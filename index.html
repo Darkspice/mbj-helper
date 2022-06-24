@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" href="icon.ico" sizes="any"><!-- 32×32 -->
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <link rel="manifest" href="manifest.webmanifest">
+  <title>BMJ helper</title>
+</head>
+
+<body>
+  <style>
+    html,
+    body {
+      height: 100%;
+    }
+
+    .main-content {
+      min-height: 100%;
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+    }
+
+    textarea {
+      width: 600px;
+      height: 500px;
+    }
+
+    pre {
+      padding: 5px;
+      font-size: 16px;
+      background-color: beige;
+      border: 2px solid darkgrey;
+    }
+  </style>
+  <div class="main-content">
+    <textarea>Сюда вставляй текс</textarea>
+    <div id="content"></div>
+  </div>
+  <script>
+    const textArea = document.querySelector('textarea')
+    const pre = document.querySelector('pre')
+    textArea.onfocus = (event) => event.target.select()
+    textArea.oninput = (event) => {
+      const allInfo = event.target.value
+
+      const bomjDictionary = {
+        newWords: { name: 'Новые слова', content: [] },
+        buisnessWords: { name: 'Бизнес слова', content: [] },
+        interestingWords: { name: 'Интересные фразы', content: [] },
+        grammarWords: { name: 'Грамматика', content: [] },
+        faildWords: { name: 'Запоротые предложения', content: [] }
+      }
+
+      const regExp = /(?:1 (?<newWords>.*?)$)|(?:2 (?<buisnessWords>.*?)$)|(?:3 (?<interestingWords>.*?)$)|(?:4 (?<grammarWords>.*?)$)|(?:5 (?<faildWords>.*?)$)/gm
+
+      const regResult = allInfo.matchAll(regExp)
+
+      for (const match of regResult) {
+        const keys = Object.keys(match.groups)
+
+        for (const key of keys) {
+          if (match.groups[key]) {
+            bomjDictionary[key].content.push(match.groups[key])
+          }
+        }
+      }
+
+      const contentBox = document.querySelector('#content')
+      contentBox.innerHTML = ''
+      Object.keys(bomjDictionary).forEach((section) => {
+        const button = document.createElement('button')
+        button.textContent = `Скопировать ${bomjDictionary[section].name} (${bomjDictionary[section].content.length})`
+        const pre = document.createElement('pre')
+        pre.textContent = bomjDictionary[section].content.join('\n')
+        button.onclick = (event) => { navigator.clipboard.writeText(bomjDictionary[section].content.join('\n')) }
+        contentBox.append(button, pre)
+      })
+    }
+  </script>
+</body>
+
+</html>
